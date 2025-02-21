@@ -15,14 +15,14 @@ DATABASE_CONFIG = {
     'port': 5432  # or your configured port
 }
 
-# Establish a connection (or use a connection pool)
+# Establish a connection (or use a connection pool
 def get_db_connection():
     conn = psycopg2.connect(**DATABASE_CONFIG)
     return conn
 
 @app.route('/submit', methods=['POST'])
 def submit_response():
-    data = request.get_json()
+    data = request.get_json() 
     user_id = data.get('user_id')
     response_text = data.get('response')
     timestamp = data.get('timestamp')
