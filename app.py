@@ -17,8 +17,8 @@ DATABASE_CONFIG = {
 
 def get_db_connection():
     # Use the DATABASE_URL environment variable if it exists (e.g., on Render)
-    db_url = os.environ.get('DATABASE_URL', 'postgresql://Rebekka:rebekka@localhost:5432/test1')
-    if db_url:
+    db_url = os.environ.get('DATABASE_URL', 'postgresql://Rebekka@localhost:5432/test1')
+    if db_url: 
         return psycopg2.connect(db_url)
     else:
         return psycopg2.connect(**DATABASE_CONFIG)
