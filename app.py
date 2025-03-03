@@ -13,19 +13,26 @@ def get_db_connection():
     
     # Ensure SSL connection for Render's PostgreSQL
     return psycopg2.connect(db_url, sslmode='require')
+
+    
 @app.route('/submit', methods=['POST'])
 def submit_response():
     data = request.get_json()
-    user_id = data.get('user_id')
-    response_text = data.get('response')
-    timestamp = data.get('timestamp')
+    participant_id = data.get('participant_id')
+    question_id = data.get('question_id')
+    complexity = data.get('complexity')
+    change_condition = data.get('change_condition')
+    participant_response = data.get('participant_response')
+    confidence = data.get('confidence')
+    reaction_time = data.get('reaction_time')
     
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO responses (user_id, response, timestamp) VALUES (%s, %s, %s)",
-        (user_id, response_text, timestamp)
-    )
+    cur.execute("""
+        INSERT INTO survey_responses 
+        (participant_id, question_id, complexity, change_condition, participant_response, confidence, reaction_time)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (participant_id, question_id, complexity, change_condition, participant_response, confidence, reaction_time))
     conn.commit()
     cur.close()
     conn.close()
