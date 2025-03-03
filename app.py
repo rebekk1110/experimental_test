@@ -6,12 +6,11 @@ import os
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests from your GitHub Pages site
 
+
 def get_db_connection():
-    db_url = os.environ.get('postgresql://rebekka:91p51XObu43ghFbjnLvDZvBhKIwpi2cR@dpg-cuveog0gph6c73erc2gg-a.frankfurt-postgres.render.com/cb_db_20d4')  #URL fra Render
+    db_url = os.environ.get("DATABASE_URL")
     if not db_url:
         raise ValueError("DATABASE_URL environment variable not set.")
-    
-    # Ensure SSL connection for Render's PostgreSQL
     return psycopg2.connect(db_url, sslmode='require')
 
 
@@ -30,7 +29,7 @@ def submit_response():
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO survey_responses 
-        (participant_id, question_id, complexity, change_condition, participant_response, confidence, reaction_time)
+        (participant_id, question_id, complexitypl, change_condition, participant_response, confidence, reaction_time)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (participant_id, question_id, complexity, change_condition, participant_response, confidence, reaction_time))
     conn.commit()
