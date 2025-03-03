@@ -13,8 +13,6 @@ def get_db_connection():
     
     # Ensure SSL connection for Render's PostgreSQL
     return psycopg2.connect(db_url, sslmode='require')
-
-
 @app.route('/submit', methods=['POST'])
 def submit_response():
     data = request.get_json()
@@ -62,4 +60,8 @@ def register_participant():
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+=======
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+>>>>>>> recovered-branch
