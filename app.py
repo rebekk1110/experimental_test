@@ -17,13 +17,18 @@ def get_db_connection():
 @app.route('/submit', methods=['POST'])
 def submit_response():
     data = request.get_json()
-    participant_id = data.get('participant_id')
+    participant_id = data.get('participant_id', 'anonymous')
     question_id = data.get('question_id')
     complexity = data.get('complexity')
     change_condition = data.get('change_condition')
     participant_response = data.get('participant_response')
-    confidence = data.get('confidence')
-    reaction_time = data.get('reaction_time')
+
+    try:
+        confidence = int(data.get('confidence', 0))  # Default to 0 if missing
+        reaction_time = int(data.get('reaction_time', 0))
+    except ValueError:
+        confidence = 0
+        reaction_time = 0
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -55,11 +60,17 @@ def register_participant():
             VALUES (%s, %s, %s, %s, %s)
             RETURNING id;
         """, (gender, education, age, experience, consent))
-        participant_id = cur.fetchone()[0]
+        
+        participant_id = cur.fetchone()
         conn.commit()
         cur.close()
         conn.close()
-        return jsonify({"participant_id": participant_id}), 200
+
+        if participant_id:
+            return jsonify({"participant_id": participant_id[0]}), 200
+        else:
+            return jsonify({"error": "Failed to get participant_id"}), 500
+
     except Exception as e:
         app.logger.error("Error in /register: %s", e)
         return jsonify({"error": str(e)}), 500
