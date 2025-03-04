@@ -8,7 +8,7 @@ CORS(app)  # Allow cross-origin requests from your GitHub Pages site
 
 
 def get_db_connection():
-    db_url = os.environ.get("DATABASE_URL")
+    db_url = os.environ.get("DATABASE_URL", "postgresql://rebekka:91p51XObu43ghFbjnLvDZvBhKIwpi2cR@dpg-cuveog0gph6c73erc2gg-a/cb_db_20d4")
     if not db_url:
         raise ValueError("DATABASE_URL environment variable not set.")
     return psycopg2.connect(db_url, sslmode='require')
@@ -63,7 +63,10 @@ def register_participant():
     except Exception as e:
         app.logger.error("Error in /register: %s", e)
         return jsonify({"error": str(e)}), 500
-
+        
+@app.route("/")
+def home():
+    return "Hello, Flask is running!"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
