@@ -28,7 +28,7 @@ def submit_response():
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO survey_responses 
+        INSERT INTO responses 
         (participant_id, question_id, complexitypl, change_condition, participant_response, confidence, reaction_time)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (participant_id, question_id, complexity, change_condition, participant_response, confidence, reaction_time))
@@ -63,7 +63,7 @@ def register_participant():
     except Exception as e:
         app.logger.error("Error in /register: %s", e)
         return jsonify({"error": str(e)}), 500
-        
+
 @app.route("/")
 def home():
     return "Hello, Flask is running!"
