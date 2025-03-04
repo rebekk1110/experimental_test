@@ -58,7 +58,7 @@ def register_participant():
         cur.execute("""
             INSERT INTO participants (gender, education, age, experience, consent)
             VALUES (%s, %s, %s, %s, %s)
-            RETURNING id;
+            RETURNING participant_id;
         """, (gender, education, age, experience, consent))
         
         participant_id = cur.fetchone()
