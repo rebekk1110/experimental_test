@@ -4,7 +4,6 @@ import psycopg2
 import os
 import json  # Add this import at the top of your file
 
-
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests from your GitHub Pages site
 
@@ -16,7 +15,6 @@ def get_db_connection():
     return psycopg2.connect(db_url, sslmode='require')
 
 
-
 @app.route('/submit', methods=['POST'])
 def submit_response():
     data = request.get_json()
@@ -26,22 +24,21 @@ def submit_response():
 
         participant_id = data.get('participant_id', 'anonymous')
         question_id = data.get('question_id')
-        user_answer = data.get('user_answer')
-        true_answer = data.get('true_answer')
+        participant_response= data.get('participant_response')
         change_condition = data.get('change_condition')
         confidence = data.get('confidence', 0)
         reaction_time = data.get('reaction_time', 0)
 
         # Log the variables
-        print(f"participant_id: {participant_id}, question_id: {question_id}, user_answer: {user_answer}, change_condition: {change_condition}")
+        print(f"participant_id: {participant_id}, question_id: {question_id}, participant_response: {participant_response}, change_condition: {change_condition}")
         
         conn = get_db_connection()
         cur = conn.cursor()
 
         cur.execute("""
-            INSERT INTO responses (participant_id, question_id, user_answer, true_answer, change_condition, confidence, reaction_time)
+            INSERT INTO responses (participant_id, question_id, participant_response, change_condition, confidence, reaction_time)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (participant_id, question_id, user_answer, true_answer, change_condition, confidence, reaction_time))
+        """, (participant_id, question_id, participant_response, change_condition, confidence, reaction_time))
         
         conn.commit()
         cur.close()
