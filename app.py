@@ -26,7 +26,7 @@ def submit_response():
     change_condition = data.get('change_condition')
     participant_response = data.get('participant_response')
 
-    # Check if participant_response is a dictionary and convert it to a JSON string
+    # Convert the participant_response to a JSON string if it's a dict
     if isinstance(participant_response, dict):
         participant_response = json.dumps(participant_response)  # Convert dict to JSON string
     
@@ -45,6 +45,22 @@ def submit_response():
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (participant_id, question_id, complexity, change_condition, participant_response, confidence, reaction_time))
     conn.commit()
+
+       # Check if the participant has answered all 3 questions
+    cur.execute("""
+       do  SELECT COUNT(DISTINCT question_id) FROM responses WHERE participant_id = %s
+    """, (participant_id,))
+    
+    answered_questions = cur.fetchone()[0]
+
+    # If all 3 questions are answered, mark the participant as completed
+    if answered_questions == 3:
+        cur.execute("""
+            UPDATE participants
+            SET completed = TRUE
+            WHERE participant_id = %s
+        """, (participant_id,))
+    
     cur.close()
     conn.close()
     
@@ -61,21 +77,25 @@ def register_participant():
     consent = data.get('consent', True)
     
     try:
+        # Create a connection to the database
         conn = get_db_connection()
         cur = conn.cursor()
+
+        # Insert the participant's data, without the need to specify created_at (it will be automatically set)
         cur.execute("""
             INSERT INTO participants (gender, education, age, experience, consent)
             VALUES (%s, %s, %s, %s, %s)
             RETURNING participant_id;
         """, (gender, education, age, experience, consent))
-
-
+        
+        # Fetch the participant_id
         participant_id = cur.fetchone()
-        conn.commit()
+        
+        conn.commit()  # Commit the changes
         cur.close()
         conn.close()
 
-        if participant_id and len(participant_id)>0:
+        if participant_id and len(participant_id) > 0:
             return jsonify({"participant_id": participant_id[0]}), 200
         else:
             return jsonify({"error": "Failed to get participant_id"}), 500
@@ -83,6 +103,7 @@ def register_participant():
     except Exception as e:
         app.logger.error("Error in /register: %s", e)
         return jsonify({"error": str(e)}), 500
+
         
 @app.route("/")
 def home():
