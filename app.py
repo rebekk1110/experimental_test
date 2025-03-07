@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import psycopg2
 import os
+import json  # Add this import at the top of your file
+
 
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests from your GitHub Pages site
@@ -14,6 +16,7 @@ def get_db_connection():
     return psycopg2.connect(db_url, sslmode='require')
 
 
+
 @app.route('/submit', methods=['POST'])
 def submit_response():
     data = request.get_json()
@@ -23,6 +26,10 @@ def submit_response():
     change_condition = data.get('change_condition')
     participant_response = data.get('participant_response')
 
+    # Check if participant_response is a dictionary and convert it to a JSON string
+    if isinstance(participant_response, dict):
+        participant_response = json.dumps(participant_response)  # Convert dict to JSON string
+    
     try:
         confidence = int(data.get('confidence', 0))  # Default to 0 if missing
         reaction_time = int(data.get('reaction_time', 0))
@@ -43,6 +50,7 @@ def submit_response():
     
     return jsonify({"message": "Response saved!"}), 200
 
+
 @app.route('/register', methods=['POST'])
 def register_participant():
     data = request.get_json()
@@ -60,13 +68,14 @@ def register_participant():
             VALUES (%s, %s, %s, %s, %s)
             RETURNING participant_id;
         """, (gender, education, age, experience, consent))
-        
+
+
         participant_id = cur.fetchone()
         conn.commit()
         cur.close()
         conn.close()
 
-        if participant_id:
+        if participant_id and len(participant_id)>0:
             return jsonify({"participant_id": participant_id[0]}), 200
         else:
             return jsonify({"error": "Failed to get participant_id"}), 500
