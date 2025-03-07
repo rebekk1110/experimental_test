@@ -77,14 +77,14 @@ def register_participant():
         """, (gender, education, age, experience, consent))
         
         # Fetch the participant_id
-        participant_id = cur.fetchone()
+        participant_id = cur.fetchone()[0]
         
         conn.commit()  # Commit the changes
         cur.close()
         conn.close()
 
-        if participant_id and len(participant_id) > 0:
-            return jsonify({"participant_id": participant_id[0]}), 200
+        if participant_id:
+            return jsonify({"participant_id": participant_id}), 200
         else:
             return jsonify({"error": "Failed to get participant_id"}), 500
 
