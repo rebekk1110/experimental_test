@@ -23,6 +23,8 @@ def submit_response():
         print(f"Received data: {data}")
 
         participant_id = data.get('participant_id', 'anonymous')
+        print(f"participant_id type: {type(participant_id)}, value: {participant_id}")
+
         question_id = data.get('question_id')
         participant_response= data.get('participant_response')
         change_condition = data.get('change_condition')
