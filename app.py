@@ -20,51 +20,40 @@ def get_db_connection():
 @app.route('/submit', methods=['POST'])
 def submit_response():
     data = request.get_json()
-    participant_id = data.get('participant_id', 'anonymous')
-    question_id = data.get('question_id')
-    complexity = data.get('complexity')
-    change_condition = data.get('change_condition')
-    participant_response = data.get('participant_response')
-
-    # Convert the participant_response to a JSON string if it's a dict
-    if isinstance(participant_response, dict):
-        participant_response = json.dumps(participant_response)  # Convert dict to JSON string
-    
     try:
-        confidence = int(data.get('confidence', 0))  # Default to 0 if missing
-        reaction_time = int(data.get('reaction_time', 0))
-    except ValueError:
-        confidence = 0
-        reaction_time = 0
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO responses 
-        (participant_id, question_id, complexity, change_condition, participant_response, confidence, reaction_time)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (participant_id, question_id, complexity, change_condition, participant_response, confidence, reaction_time))
-    conn.commit()
+        # Log the data to check what's being received
+        print(f"Received data: {data}")
 
-       # Check if the participant has answered all 3 questions
-    cur.execute("""
-       do  SELECT COUNT(DISTINCT question_id) FROM responses WHERE participant_id = %s
-    """, (participant_id,))
-    
-    answered_questions = cur.fetchone()[0]
+        participant_id = data.get('participant_id', 'anonymous')
+        question_id = data.get('question_id')
+        user_answer = data.get('user_answer')
+        true_answer = data.get('true_answer')
+        change_condition = data.get('change_condition')
+        confidence = data.get('confidence', 0)
+        reaction_time = data.get('reaction_time', 0)
 
-    # If all 3 questions are answered, mark the participant as completed
-    if answered_questions == 3:
+        # Log the variables
+        print(f"participant_id: {participant_id}, question_id: {question_id}, user_answer: {user_answer}, change_condition: {change_condition}")
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+
         cur.execute("""
-            UPDATE participants
-            SET completed = TRUE
-            WHERE participant_id = %s
-        """, (participant_id,))
-    
-    cur.close()
-    conn.close()
-    
-    return jsonify({"message": "Response saved!"}), 200
+            INSERT INTO responses (participant_id, question_id, user_answer, true_answer, change_condition, confidence, reaction_time)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (participant_id, question_id, user_answer, true_answer, change_condition, confidence, reaction_time))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({"message": "Response saved!"}), 200
+
+    except Exception as e:
+        # Log the error and send the error response
+        app.logger.error(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/register', methods=['POST'])
