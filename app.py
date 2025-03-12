@@ -39,7 +39,7 @@ def submit_response():
 
         cur.execute("""
             INSERT INTO responses (participant_id, question_id, participant_response, change_condition, confidence, reaction_time)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, (participant_id, question_id, participant_response, change_condition, confidence, reaction_time))
         
         conn.commit()
