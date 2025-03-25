@@ -7,7 +7,6 @@ import json  # Add this import at the top of your file
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests from your GitHub Pages site
 
-
 def get_db_connection():
     db_url = os.environ.get("DATABASE_URL", "postgresql://rebekka:91p51XObu43ghFbjnLvDZvBhKIwpi2cR@dpg-cuveog0gph6c73erc2gg-a/cb_db_20d4")
     if not db_url:
