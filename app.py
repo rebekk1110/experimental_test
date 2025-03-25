@@ -91,6 +91,31 @@ def register_participant():
         app.logger.error("Error in /register: %s", e)
         return jsonify({"error": str(e)}), 500
 
+
+
+@app.route('/complete', methods=['POST'])
+def complete_survey():
+    data = request.get_json()
+    participant_id = data.get('participant_id')
+    if not participant_id:
+        return jsonify({"error": "Missing participant_id"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE participants 
+            SET completed = true 
+            WHERE participant_id = %s
+        """, (participant_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"message": "Survey marked as completed"}), 200
+    except Exception as e:
+        app.logger.error("Error in /complete: %s", e)
+        return jsonify({"error": str(e)}), 500
+
         
 @app.route("/")
 def home():
