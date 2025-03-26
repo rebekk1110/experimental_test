@@ -25,25 +25,38 @@ def submit_response():
         print(f"participant_id type: {type(participant_id)}, value: {participant_id}")
 
         question_id = data.get('question_id')
-        participant_response= data.get('participant_response')
         change_condition = data.get('change_condition')
-        confidence = data.get('confidence', 0)
+        change_response = data.get('change_response')
+        change_condition = data.get('change_condition')
         reaction_time = data.get('reaction_time', 0)
+        original_color = data.get('original_color')
+        color_response = data.get('color_response')
+        color_confidence = data.get('color_confidence', 0)
 
         # Log the variables
-        print(f"participant_id: {participant_id}, question_id: {question_id}, participant_response: {participant_response}, change_condition: {change_condition}")
-        
+        print(f"participant_id: {participant_id}, question_id: {question_id}, "
+              f"change_response: {change_response}, change_condition: {change_condition}, "
+              f"change_confidence: {change_confidence}, reaction_time: {reaction_time}, original_color: {original_color}, "
+              f"color_response: {color_response}, color_confidence: {color_confidence}")
+
         conn = get_db_connection()
         cur = conn.cursor()
 
         cur.execute("""
-            INSERT INTO responses (participant_id, question_id, participant_response, change_condition, confidence, reaction_time)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (participant_id, question_id, participant_response, change_condition, confidence, reaction_time))
+            INSERT INTO responses 
+              (participant_id, question_id, change_response, change_condition, change_confidence, reaction_time , original_color, color_response, color_confidence)
+            VALUES 
+              (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+              participant_id, question_id, change_response, change_condition, 
+              change_confidence, reaction_time, 
+              original_color, color_response, color_confidence
+        ))
         
         conn.commit()
         cur.close()
         conn.close()
+
 
         return jsonify({"message": "Response saved!"}), 200
 
@@ -116,7 +129,33 @@ def complete_survey():
         app.logger.error("Error in /complete: %s", e)
         return jsonify({"error": str(e)}), 500
 
-        
+@app.route('/finalize', methods=['POST'])
+def finalize_participant():
+    data = request.get_json()
+    participant_id = data.get('participant_id')
+    effort = data.get('effort')
+    feedback = data.get('feedback')
+
+    if not participant_id:
+        return jsonify({"error": "Missing participant_id"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE participants
+            SET effort = %s,
+                feedback = %s
+            WHERE participant_id = %s
+        """, (effort, feedback, participant_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"message": "Participant record updated with final data!"}), 200
+    except Exception as e:
+        app.logger.error("Error in /finalize: %s", e)
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/")
 def home():
     return "Hello, Flask is running!"
