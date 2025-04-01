@@ -27,7 +27,7 @@ def submit_response():
         question_id = data.get('question_id')
         change_condition = data.get('change_condition')
         change_response = data.get('change_response')
-        change_condition = data.get('change_condition')
+        change_confidence = data.get('change_confidence')
         reaction_time = data.get('reaction_time', 0)
         original_color = data.get('original_color')
         color_response = data.get('color_response')
